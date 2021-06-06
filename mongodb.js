@@ -17,18 +17,13 @@ MongoClient.connect(
 
         const db = client.db(databaseName)
 
-        // db.collection('users').updateOne(
+        // db.collection('users').deleteMany(
         //     {
-        //         _id: new ObjectID("60b9202bf3453c528be04c50")
-        //     },
-        //     {
-        //         $set: {
-        //             name: 'Harke'
-        //         }
+        //         age: 26
         //     }
         // ).then(
         //     (result) => {
-        //         console.log(result)
+        //         console.log(result.deletedCount)
         //     }
         // ).catch(
         //     (error) => {
@@ -36,25 +31,18 @@ MongoClient.connect(
         //     }
         // )
 
-        // db.collection('tasks').updateMany(
-        //     {
-        //         completed: false
-        //     },
-        //     {
-        //         $set: {
-        //             completed: true
-        //         }
-        //     }
-        // ).then(
-        //     (result)=>{
-        //         console.log(result.modifiedCount)
-        //     }
-        // ).catch(
-        //     (error) => {
-        //         console.log(error)
-        //     }
-        // )
-
-
+        db.collection('tasks').deleteOne(
+            {
+                title: 'task 1'
+            }
+        ).then(
+            (result) => {
+                console.log(result.deletedCount)
+            }
+        ).catch(
+            (error) => {
+                console.log(error)
+            }
+        )
     }
 )
