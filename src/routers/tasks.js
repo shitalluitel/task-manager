@@ -4,11 +4,27 @@ const Task = require('../models/task')
 router.route('')
     .post(
         (req, res) => {
-            const task = new Task(req.body)
-            task.save()
+            Task.create(req.body)
                 .then(
                     (result) => {
+                        console.log(result)
                         res.send(result)
+                    }
+                )
+                .catch(
+                    (error) => {
+                        res.status(400)
+                        res.send(error)
+                    }
+                )
+        }
+    )
+    .get(
+        (req, res) => {
+            Task.find()
+                .then(
+                    (results) => {
+                        res.send(results)
                     }
                 )
                 .catch(
