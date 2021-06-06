@@ -1,4 +1,4 @@
-const { MongoClient, ObjectID } = require('mongodb')
+const {MongoClient, ObjectID} = require('mongodb')
 
 const connectionURL = 'mongodb://127.0.0.1:27017'
 const databaseName = 'task-manager'
@@ -32,15 +32,19 @@ MongoClient.connect(
         // )
 
         // insert many documents into collection at once
-        // db.collection('users').insertMany(
+        // db.collection('tasks').insertMany(
         //     [
         //         {
-        //             name: 'Hari Maharjan',
-        //             age: 25
+        //             title: 'task 1',
+        //             completed: true
         //         },
         //         {
-        //             name: 'hari Khadka',
-        //             age: 26
+        //             title: 'task 2',
+        //             completed: false
+        //         },
+        //         {
+        //             title: 'task 3',
+        //             completed: false
         //         }
         //     ],
         //     {},
@@ -54,6 +58,55 @@ MongoClient.connect(
 
 
         // read document from collection
+
+        // db.collection('users').findOne(
+        //     {
+        //         // name: 'Shital Babu Luitel'
+        //         // age: 25
+        //         _id: ObjectID('60b9202bf3453c528be04c51')
+        //     },
+        //     {},
+        //     (error, user) => {
+        //         if (error){
+        //             return console.log(error)
+        //         }
+        //
+        //         console.log(user)
+        //     }
+        // )
+
+        // db.collection('users').find({age: 25}).toArray(
+        //     (error, users) => {
+        //         console.log(users)
+        //     }
+        // )
+
+        db.collection('tasks').findOne(
+            {
+                _id: new ObjectID('60bc479e09401334beb989ce')
+            },
+            (error, task) => {
+                if (error) {
+                    return console.log(error)
+                }
+
+                console.log(task)
+            }
+        )
+
+        db.collection('tasks').find(
+            {
+                completed: false
+            }
+        ).toArray(
+            (error, tasks) => {
+                if (error) {
+                    return console.log(error)
+                }
+
+                console.log(tasks)
+            }
+        )
 
     }
 )
