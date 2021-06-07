@@ -36,5 +36,28 @@ router.route('')
         }
     )
 
+router.route('/:id')
+    .get(
+        (request, response) => {
+            const _id = request.params.id
+            Task.findById(_id)
+                .then(
+                    (task) => {
+                        if (!task) {
+                            return response.status(404).send({
+                                message: 'No data found.'
+                            })
+                        }
+                        response.send(task)
+                    }
+                )
+                .catch(
+                    (error) => {
+                        response.status(500).send()
+                    }
+                )
+        }
+    )
+
 
 module.exports = router
