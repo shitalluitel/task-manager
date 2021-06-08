@@ -57,20 +57,18 @@ router.route('/:id')
             }
 
             try {
-                const task = await Task.findByIdAndUpdate(
-                    request.params.id,
-                    request.body,
-                    {
-                        new: true,
-                        runValidators: true
-                    }
-                )
-                if (!task) {
-                    return response.send(404).send(
-                        {message: 'No data found.'}
+                const task = await Task.findById(request.params.id)
+                if (task) {
+                    updates.forEach(
+                        (update) => task[update] = request.body[update]
                     )
+                    await task.save()
+                    return response.send(task)
                 }
-                response.send(task)
+
+                return response.send(404).send(
+                    {message: 'No data found.'}
+                )
             } catch (e) {
                 response.status(400).send(e)
             }

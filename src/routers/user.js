@@ -7,7 +7,8 @@ router.route('')
         async (request, response) => {
             try {
                 const user = await User.create(request.body)
-                response.status(201).send(user)
+                const token = await user.generateAuthToken()
+                response.status(201).send({user, token})
             } catch (e) {
                 response.status(400).send(e)
             }
@@ -24,6 +25,23 @@ router.route('')
         }
     )
 
+router.route('/login')
+    .post(
+        async (request, response) => {
+            try {
+                const user = await User.findByCredentials(
+                    request.body.email,
+                    request.body.password
+                )
+
+                const token = await user.generateAuthToken()
+                response.send({user, token})
+            } catch (e) {
+                console.log(e)
+                response.status(400).send(e)
+            }
+        }
+    )
 
 router.route('/:id')
     .get(
@@ -62,22 +80,20 @@ router.route('/:id')
                 const _id = request.params.id
                 const data = request.body
 
-                const user = await User.findByIdAndUpdate(
-                    _id,
-                    data,
+                const user = await User.findById(_id)
+                if (user) {
+                    updates.forEach(
+                        (update) => user[update] = data[update]
+                    )
+                    await user.save()
+                    return response.send(user)
+                }
+
+                response.status(404).send(
                     {
-                        new: true,
-                        runValidators: true,
+                        "message": "No data found."
                     }
                 )
-                if (!user) {
-                    return response.status(404).send(
-                        {
-                            "message": "No data found."
-                        }
-                    )
-                }
-                response.send(user)
             } catch (e) {
                 response.status(400).send(e)
             }
@@ -101,5 +117,6 @@ router.route('/:id')
             }
         }
     )
+
 
 module.exports = router
