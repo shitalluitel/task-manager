@@ -1,8 +1,10 @@
 const router = require('express').Router()
 const Task = require('../models/task')
+const auth = require('../middleware/auth')
 
 router.route('')
     .post(
+        auth,
         async (req, res) => {
             try {
                 const task = await Task.create(req.body)
@@ -13,6 +15,7 @@ router.route('')
         }
     )
     .get(
+        auth,
         async (req, res) => {
             try {
                 const tasks = await Task.find({})
@@ -25,6 +28,7 @@ router.route('')
 
 router.route('/:id')
     .get(
+        auth,
         async (request, response) => {
             try {
                 const _id = request.params.id
@@ -43,6 +47,7 @@ router.route('/:id')
         }
     )
     .patch(
+        auth,
         async (request, response) => {
             const updates = Object.keys(request.body)
             const availableUpdates = ['description', 'completed']
@@ -75,6 +80,7 @@ router.route('/:id')
         }
     )
     .delete(
+        auth,
         async (request, response) => {
             const _id = request.params.id
             try {

@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const User = require('../models/user')
+const auth = require("../middleware/auth");
 
 
 router.route('')
@@ -14,14 +15,12 @@ router.route('')
             }
         }
     )
+
+router.route('/me')
     .get(
+        auth,
         async (request, response) => {
-            try {
-                const users = await User.find({})
-                response.status(200).send(users)
-            } catch (e) {
-                response.status(500).send(e)
-            }
+            response.send(request.user)
         }
     )
 
@@ -43,8 +42,27 @@ router.route('/login')
         }
     )
 
+router.route('/logout')
+    .post(
+        auth,
+        async (request, response) => {
+            try{
+                request.user.tokens = request.user.tokens.filter(
+                    (token) => {
+                        return token.token !== request.token
+                    }
+                )
+
+                await request.user.save()
+                response.send()
+            }catch (e){
+                response.status(500)
+            }
+        }
+    )
 router.route('/:id')
     .get(
+        auth,
         async (request, response) => {
             try {
                 const _id = request.params.id
@@ -63,6 +81,7 @@ router.route('/:id')
         }
     )
     .patch(
+        auth,
         async (request, response) => {
             const updates = Object.keys(request.body)
             const allowedUpdates = ['name', 'email', 'password', 'age']
@@ -100,6 +119,7 @@ router.route('/:id')
         }
     )
     .delete(
+        auth,
         async (request, response) => {
             try {
                 const _id = request.params.id
