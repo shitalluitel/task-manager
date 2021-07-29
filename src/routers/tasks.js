@@ -18,11 +18,24 @@ router.route('')
         }
     )
     .get(
+        // GET /tasks?completed=(true|false)
         auth,
         async (req, res) => {
+            const {completed} = req.query
+            let match = {}
+
+            if (completed) {
+                match.completed = completed === 'true'
+            }
+
             try {
                 // const tasks = await Task.find({owner: req.user._id})
-                await req.user.populate('tasks').execPopulate() // by relationship
+                await req.user.populate(
+                    {
+                        path: 'tasks',
+                        match
+                    }
+                ).execPopulate() // by relationship
                 res.send(req.user.tasks)
             } catch (e) {
                 res.status(500).send(e)
