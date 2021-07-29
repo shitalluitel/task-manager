@@ -60,6 +60,7 @@ router.route('/logout')
             }
         }
     )
+
 router.route('/:id')
     .get(
         auth,
@@ -118,17 +119,20 @@ router.route('/:id')
             }
         }
     )
+
+router.route('/me')
     .delete(
         auth,
         async (request, response) => {
             try {
-                const _id = request.params.id
-                const user = await User.findByIdAndRemove(_id)
-                if (!user) {
-                    return response.status(404).send()
-                }
+                // const _id = request.user._id
+                // const user = await User.findByIdAndRemove(_id)
+                // if (!user) {
+                //     return response.status(404).send()
+                // }
+                await request.user.remove()
                 response.send({
-                    'message': 'Successfully deleted the user with id "' + _id + '".'
+                    'message': 'Successfully deleted the user with id "' + request.user._id + '".'
                 })
 
 

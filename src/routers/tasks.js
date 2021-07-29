@@ -7,7 +7,10 @@ router.route('')
         auth,
         async (req, res) => {
             try {
-                const task = await Task.create(req.body)
+                const task = await Task.create({
+                    ...req.body,
+                    owner: req.user._id
+                })
                 res.status(201).send(task)
             } catch (e) {
                 res.status(400).send(e)
@@ -18,8 +21,9 @@ router.route('')
         auth,
         async (req, res) => {
             try {
-                const tasks = await Task.find({})
-                res.send(tasks)
+                // const tasks = await Task.find({owner: req.user._id})
+                await req.user.populate('tasks').execPopulate() // by relationship
+                res.send(req.user.tasks)
             } catch (e) {
                 res.status(500).send(e)
             }
@@ -32,11 +36,13 @@ router.route('/:id')
         async (request, response) => {
             try {
                 const _id = request.params.id
-                const task = await Task.findById(_id)
+                const task = await Task.findOne({_id, owner: request.user._id})
                 if (!task) {
-                    return response.status(404).send({
-                        message: 'No data found.'
-                    })
+                    return response.status(404).send(
+                        {
+                            message: 'No data found.'
+                        }
+                    )
                 }
                 response.send(task)
             } catch (e) {
@@ -62,7 +68,8 @@ router.route('/:id')
             }
 
             try {
-                const task = await Task.findById(request.params.id)
+                const _id = request.params.id
+                const task = await Task.findOne({_id, owner: request.user._id})
                 if (task) {
                     updates.forEach(
                         (update) => task[update] = request.body[update]
@@ -84,7 +91,7 @@ router.route('/:id')
         async (request, response) => {
             const _id = request.params.id
             try {
-                const task = await Task.findByIdAndRemove(_id)
+                const task = await Task.findOneAndDelete({_id, owner: request.user._id})
                 if (!task) {
                     return response.status(404).send({
                         message: 'No data found.'
