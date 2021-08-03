@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const User = require('../models/user')
 const auth = require("../middleware/auth");
+const multer = require("multer");
 
 
 router.route('')
@@ -46,7 +47,7 @@ router.route('/logout')
     .post(
         auth,
         async (request, response) => {
-            try{
+            try {
                 request.user.tokens = request.user.tokens.filter(
                     (token) => {
                         return token.token !== request.token
@@ -55,7 +56,7 @@ router.route('/logout')
 
                 await request.user.save()
                 response.send()
-            }catch (e){
+            } catch (e) {
                 response.status(500)
             }
         }
@@ -142,5 +143,64 @@ router.route('/me')
         }
     )
 
+const upload = multer({
+    // dest: 'media/',
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(request, file, callback) {
+        if (!file.originalname.match(/\.(jpeg|jpg|png)$/)) {
+            return callback(new Error('Please upload an image.'))
+        }
+        callback(undefined, true)
+    }
+})
+
+router.route('/me/avatar')
+    .post(
+        auth,
+        upload.single('avatar'),
+        async (request, response) => {
+            try {
+                request.user.avatar = request.file.buffer
+                await request.user.save()
+                response.send()
+            } catch (e) {
+               response.status(400).send()
+            }
+        },
+        (error, request, response, next) => {
+            response.status(400).send({error: error.message})
+        }
+    )
+    .delete(
+        auth,
+        async (req, res) => {
+            try {
+                req.user.avatar = undefined
+                await req.user.save()
+                return res.send()
+            }catch (e){
+                res.status(400).send()
+            }
+        }
+    )
+
+router.route('/:id/avatar')
+    .get(
+        async (req, res) => {
+            try{
+                const user = await User.findById(req.params.id)
+                if (!user || !user.avatar) {
+                    throw new Error('unable to find avatar')
+                }
+
+                res.set('Content-Type', 'image/jpg')
+                res.send(user.avatar)
+            }catch (e){
+                res.status(400).send({error: e})
+            }
+        }
+    )
 
 module.exports = router
